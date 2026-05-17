@@ -50,15 +50,14 @@ const CONFIG = {
   },
 
   // ── SECONDARY FLOWER ──────────────────────────────────
-  // Placed to the left, lower, slightly smaller → perspective depth
+  // Shares root with main stem, curves far left with S-stem for depth separation
   secondaryFlower: {
     // Fraction of canvas: x left-of-centre, y slightly below main
-    xFrac        : 0.27,
-    yFrac        : 0.54,
-    scale        : 0.60,   // size relative to main flower
-    bloomDelay   : 2.8,    // extra seconds after BLOOM_START
+    xFrac        : 0.55,   // further left for more dramatic S-curve
+    yFrac        : 0.65,   // short stem, stays at similar height to main flower
+    scale        : 0.50,   // size relative to main flower
+    bloomDelay   : 2.0,    // extra seconds after BLOOM_START
     breezeScale  : 0.55,   // reduced wind influence (farther away)
-    stemOffsetY  : 0.08,   // stem base lower as fraction of H
     petalHueShift: 8,      // petals slightly warmer/older colour
   },
 

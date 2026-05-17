@@ -1,53 +1,264 @@
-# Love.html — Configuration Guide
+# 🌹 For You, With Love — Animated Flower Confession
 
-"For You, With Love" is a beautiful animated flower scene with customizable messages and visual parameters.
+A stunning interactive HTML5 Canvas animation featuring a blooming rose with a secondary flower, animated messages, and beautiful visual effects. Perfect for expressing your feelings or creating a romantic experience.
+
+## ✨ Features
+
+- **Dual Blooming Flowers**: Main rose with a secondary companion flower connected by an S-curved stem
+- **Smooth Animation**: 60fps canvas rendering with easing functions and physics
+- **Customizable Messages**: Floating love messages that appear throughout the animation
+- **Music Integration**: Background music with auto-play and manual toggle button
+- **Visual Effects**:
+  - Particle systems (pollen, bokeh lights, dew drops)
+  - Subsurface scattering on petals with specularity
+  - Realistic stem with micro-trichomes and leaves
+  - Animated grass layers (short grass, sharp grasses, tiny wildflowers)
+  - Dynamic breeze wind effect
+  - Vignette and grain overlays for cinematic feel
+- **Fully Configurable**: Separate config file for easy customization
+- **Responsive**: Adapts to different screen sizes
 
 ---
 
-## Structure
+## 🚀 Quick Start
 
-The project now consists of two separate files:
+### Option 1: Direct Open (Simple)
+1. Double-click `Love.html` to open in your default browser
+2. Wait ~2 seconds for music to auto-play
 
-- **`Love.html`** — The main HTML/CSS/Canvas animation (imports config)
-- **`config.js`** — All customizable parameters (separate from the animation)
+### Option 2: Local Server (Recommended)
+Recommended if you have audio issues or want to avoid browser security restrictions:
 
-This separation makes it easy to customize the visualization without touching the animation code.
-
----
-
-## Quick Start
-
-1. Open `Love.html` in your browser (double-click) **or** run a local static server
-2. The animation starts automatically
-3. Edit `config.js` to customize the scene
-
-### Running with a local server (recommended)
-If you encounter any browser restrictions, run a local static server:
 ```bash
 # Using Python 3
 python -m http.server 8000
 
-# Then open: http://localhost:8000/Love.html
+# Using Node.js (http-server)
+npx http-server
+
+# Then open in your browser: http://localhost:8000
 ```
 
 ---
 
-## Customization: Editing `config.js`
+## 📁 Project Structure
 
-All parameters are in `config.js`. Edit values directly and refresh your browser to see changes.
+```
+Love-Confession/
+├── Love.html          # Main animation (HTML/CSS/Canvas + JS)
+├── config.js          # Customizable parameters
+├── assets/
+│   └── music.mp3      # Background music
+└── README.md          # This file
+```
+
+---
+
+## ⚙️ Customization: Editing `config.js`
+
+All visual and behavior parameters are in `config.js`. Simply edit the values and refresh your browser to see changes instantly.
 
 ### Key Configuration Sections
 
-#### **TIMING** — When things bloom
+#### **TIMING** — Animation Timeline
 ```js
-BLOOM_START: 1.8,  // Seconds before bloom begins
-BLOOM_DONE: 9.5,   // Full bloom complete
+BLOOM_START: 1.8,    // When main stem starts growing (seconds)
+BLOOM_DONE: 9.5,     // Full bloom complete
 ```
 
-#### **COLORS** — Rose, gold, cream palette
+#### **COLORS** — Palette
 ```js
 colors: {
-  gold: '#d4a853',    // Accent gold
+  gold: '#d4a853',      // Warm accent
+  rose: '#c84b6e',      // Main flower color
+  cream: '#f5ede0',     // Light/text
+  deep: '#0a0608',      // Dark shadows
+  soil: '#1a0f08',      // Ground
+}
+```
+
+#### **PARTICLES** — Effects Intensity
+```js
+particles: {
+  soil: 120,                      // Soil particles
+  grass: (W) => Math.floor(W / 8) + 180,  // Grass count
+  grassFlowers: 28,               // Tiny wildflowers
+  bokeh: 22,                      // Background lights
+  pollen: 60,                     // Pollen particles
+}
+```
+
+#### **PETALS** — Flower Layers
+Three petal layers with independent configurations:
+```js
+petals: {
+  outer: {
+    count: 8,                    // Number of petals
+    length: (SCALE) => 88 * SCALE,
+    width: (SCALE) => 36 * SCALE,
+    startTime: 0.4,              // When this layer starts blooming
+    layerGap: 0.22,              // Delay between petals
+    duration: 1.1,               // How long to bloom
+    depthFactor: 1.0,            // Depth scaling
+  },
+  // mid and inner layers also customizable
+}
+```
+
+#### **SECONDARY FLOWER** — The companion
+```js
+secondaryFlower: {
+  xFrac: 0.16,        // Position: 16% from left
+  yFrac: 0.58,        // Position: 58% from top
+  scale: 0.50,        // 50% size of main flower
+  bloomDelay: 2.8,    // Starts 2.8s after main flower
+  breezeScale: 0.55,  // Less wind influence (appears farther)
+  petalHueShift: 8,   // Slightly warmer petal color
+}
+```
+
+#### **MUSIC** — Audio Settings
+```js
+musicUrl: 'assets/music.mp3',  // Path to audio file
+musicLoop: true,                // Loop the music
+musicVolume: 0.55,              // Volume 0.0–1.0
+```
+
+#### **MESSAGES** — Floating Pills
+```js
+messages: [
+  "Every moment with you feels like magic ✨",
+  "You light up every room you walk into 🌟",
+  // Add your own messages here...
+],
+messagePillDelay: 0.6,        // Delay after bloom starts
+messagePillInterval: 3500,    // ms between messages
+```
+
+---
+
+## 🎨 Visual Customization Examples
+
+### Change the Rose Color
+```js
+colors: {
+  rose: '#ff1493',  // Deep pink instead of mauve
+}
+```
+
+### Make Flowers Bloom Faster
+```js
+BLOOM_START: 0.8,   // Start earlier
+BLOOM_DONE: 5.0,    // Finish sooner
+petals: {
+  outer: { duration: 0.6 },  // Faster bloom
+  // ...
+}
+```
+
+### Add More Pollen
+```js
+particles: {
+  pollen: 150,  // 2.5x more particles
+}
+```
+
+### Adjust Grass Heights
+```js
+grass: {
+  minHeight: 40,    // Taller minimum
+  maxHeight: 80,    // Taller maximum
+}
+```
+
+### Reposition Secondary Flower
+```js
+secondaryFlower: {
+  xFrac: 0.30,  // Move right
+  yFrac: 0.40,  // Move up
+}
+```
+
+---
+
+## 🎵 Audio Setup
+
+1. Place your music file in `assets/music.mp3`
+2. The music auto-plays 1 second after page load
+3. Click the music button (♪) to pause/resume
+4. Customize timing:
+   ```js
+   musicUrl: 'assets/your-song.mp3',
+   musicVolume: 0.7,  // Adjust volume
+   ```
+
+---
+
+## 🌐 Browser Support
+
+- **Chrome/Edge**: ✅ Full support
+- **Firefox**: ✅ Full support
+- **Safari**: ✅ Full support
+- **Mobile browsers**: ✅ Responsive and touch-friendly
+
+**Note**: Some browsers may require a local server for audio playback due to autoplay policies.
+
+---
+
+## 💝 Customization Tips
+
+1. **Test frequently** — Refresh browser to see changes instantly
+2. **Small adjustments** — Change values by small increments (±5) to see subtle effects
+3. **Use HSL for colors** — Easier to adjust hue/saturation/lightness
+4. **Backup original** — Save a copy before major changes
+5. **Use browser DevTools** — Check console for any errors
+
+---
+
+## 🛠️ Technical Details
+
+- **Canvas 2D API**: All rendering via HTML5 Canvas
+- **No Dependencies**: Pure vanilla JavaScript (ES6+)
+- **Responsive**: Scales to different screen sizes
+- **Performance**: Optimized for 60fps smooth animation
+- **Accessibility**: Semantic HTML with ARIA labels
+
+---
+
+## 🎭 Animation Timeline
+
+| Time (sec) | Event |
+|---|---|
+| 0–0.8 | Stem grows |
+| 1.8+ | Main flower blooms (outer petals) |
+| 2.0+ | Leaves unfold |
+| 2.2+ | Center disk appears |
+| 2.8+ | Secondary flower starts |
+| 4.0+ | Full bloom with all effects |
+| 9.5+ | Love messages appear |
+
+---
+
+## 📝 License & Attribution
+
+Create and share freely. Perfect for:
+- Valentine's Day confessions
+- Wedding proposals
+- Anniversary messages
+- Love declarations
+- Romantic surprises
+
+---
+
+## 🤝 Contributing
+
+Feel free to fork, customize, and improve! Share your beautiful versions.
+
+---
+
+## 💬 Need Help?
+
+Check `config.js` comments for detailed parameter explanations. Most customizations are one-line edits!
   rose: '#c84b6e',    // Rose/pink
   cream: '#f5ede0',   // Cream/white
   deep: '#0a0608',    // Dark background

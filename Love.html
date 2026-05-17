@@ -182,12 +182,16 @@ function getStemPoints(bv, baseY) {
     c1x: bx + (tx-bx)*0.15 + bv*8,  c1y: lerp(by,ty,0.4),
     c2x: tx - (tx-bx)*0.1  + bv*18, c2y: lerp(by,ty,0.7) };
 }
-function getStemPointsSF(bv, baseY, topY, topX) {
-  // secondary flower — different top position
-  const by = baseY, bx = topX + bv * 2;
+function getStemPointsSF(bv, mainSP, topY, topX) {
+  // secondary flower shares root with main stem, curves far left before rising
+  const by = mainSP.by;  // shared root Y
+  const bx = mainSP.bx;  // shared root X
+  const midX = topX - (topX - bx) * 0.7;  // swing left: ~70% between start and end
+  const midY = lerp(by, topY, 0.45);
   return { bx, by, tx: topX + bv*14, ty: topY,
-    c1x: bx + (topX-bx)*0.2 + bv*4, c1y: lerp(by,topY,0.35),
-    c2x: topX - (topX-bx)*0.1 + bv*10, c2y: lerp(by,topY,0.68) };
+    c1x: midX - 80*SCALE + bv*8,     c1y: lerp(by, midY, 0.5),    // strong left curve
+    c2x: topX + (topX-bx)*0.1 + bv*6, c2y: lerp(midY, topY, 0.6)   // rise to top
+  };
 }
 function cubicBez(p0x,p0y,p1x,p1y,p2x,p2y,p3x,p3y,t) {
   const mt = 1-t;
@@ -666,6 +670,14 @@ function drawLeaves(progress, sp) {
   drawLeaf(p2.x,p2.y, 0.62+breezeVal*0.03,lLen,     lW,false,progress);
 }
 
+function drawLeavesSecondary(progress, sp, scale) {
+  const p1=cubicBez(sp.bx,sp.by,sp.c1x,sp.c1y,sp.c2x,sp.c2y,sp.tx,sp.ty,0.38);
+  const p2=cubicBez(sp.bx,sp.by,sp.c1x,sp.c1y,sp.c2x,sp.c2y,sp.tx,sp.ty,0.58);
+  const lLen=62*SCALE*scale, lW=28*SCALE*scale;
+  drawLeaf(p1.x,p1.y,-0.55+breezeVal*0.04*scale,lLen*1.1,lW,true,progress);
+  drawLeaf(p2.x,p2.y, 0.62+breezeVal*0.03*scale,lLen,     lW,false,progress);
+}
+
 // ── Soil ──────────────────────────────────────────────
 function drawSoil(groundY) {
   const soilH=H-groundY;
@@ -916,6 +928,16 @@ if (CONFIG.musicUrl && CONFIG.musicUrl.trim()!=='') {
   audio.volume = CONFIG.musicVolume;
   audio.preload = 'none';
 
+  const playMusic = () => {
+    if (!musicPlaying && audio) {
+      audio.play().then(()=>{
+        musicPlaying=true;
+        musicBtn.classList.add('playing');
+        iconNote.style.display='none'; iconPause.style.display='block';
+      }).catch(err=>console.warn('Audio play failed:',err));
+    }
+  };
+
   musicBtn.addEventListener('click', () => {
     if (musicPlaying) {
       audio.pause();
@@ -923,13 +945,12 @@ if (CONFIG.musicUrl && CONFIG.musicUrl.trim()!=='') {
       musicBtn.classList.remove('playing');
       iconNote.style.display='block'; iconPause.style.display='none';
     } else {
-      audio.play().then(()=>{
-        musicPlaying=true;
-        musicBtn.classList.add('playing');
-        iconNote.style.display='none'; iconPause.style.display='block';
-      }).catch(err=>console.warn('Audio play failed:',err));
+      playMusic();
     }
   });
+
+  // Auto-play after 1 second
+  setTimeout(playMusic, 1000);
 }
 
 // ── Cursor & sparks ───────────────────────────────────
@@ -966,13 +987,12 @@ function frame(now) {
   // Main flower stem & head
   const mainSP = getStemPoints(breezeVal, groundY);
 
-  // Secondary flower — left-ish, perspective-lower, independent stem
+  // Secondary flower — shares root with main stem, curves left before rising
   const sfCfg  = CONFIG.secondaryFlower;
   const sfX    = W * sfCfg.xFrac;
   const sfY    = H * sfCfg.yFrac;
   const sfBv   = breezeVal * sfCfg.breezeScale;
-  const sfBaseY= groundY + H * sfCfg.stemOffsetY;  // stem base a bit lower
-  const sfSP   = getStemPointsSF(sfBv, sfBaseY, sfY, sfX);
+  const sfSP   = getStemPointsSF(sfBv, mainSP, sfY, sfX);  // shared root
   const sfSc   = sfCfg.scale;
 
   // Timing
@@ -994,6 +1014,10 @@ function frame(now) {
 
   // Leaves on main stem only
   if (leafProgress > 0) drawLeaves(easeOut(leafProgress,2), mainSP);
+
+  // Leaves on secondary stem (scaled)
+  const sfLeafProgress = clamp((T-(2.0+sfCfg.bloomDelay*0.35))/0.9, 0, 1);
+  if (sfLeafProgress > 0) drawLeavesSecondary(easeOut(sfLeafProgress,2), sfSP, sfSc);
 
   // Secondary flower (behind main since it's to the left and smaller)
   if (sfFlowerT > 0) {
